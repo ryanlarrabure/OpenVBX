@@ -18,52 +18,58 @@
  * Contributor(s):
  **/
 
-upgrade_handler = (function (deps) {
-	return function() {
-		deps.$('#upgrade-steps').Steps({
-			validateCallbacks : {
-				prev : function(stepId, step) { return true; },
-				next : function(stepId, step) { return true; },
-				submit : function(stepId, step) {
-					var _success = false,
-						_this = deps.$(this);
-						
-					_this.Steps.setButtonLoading('submit', true);
-					
-					deps.$.ajax({
-						url : deps.OpenVBX.home + '/upgrade/setup',
-						data : {},
-						type : 'post',
-						async : false,
-						dataType : 'json',
-						success: function(r) {
-							_success = r.success;
-							if (!r.success) {
-								_this.triggerError(r.message);
+(function() {
+	var uh = (function (deps) {
+		return function() {
+			deps.$('#upgrade-steps').Steps({
+				validateCallbacks : {
+					prev : function(stepId, step) { return true; },
+					next : function(stepId, step) { return true; },
+					submit : function(stepId, step) {
+						var _success = false,
+							_this = deps.$(this);
+
+						_this.Steps.setButtonLoading('submit', true);
+
+						deps.$.ajax({
+							url : deps.OpenVBX.home + '/upgrade/setup',
+							data : {},
+							type : 'post',
+							async : false,
+							dataType : 'json',
+							success: function(r) {
+								_success = r.success;
+								if (!r.success) {
+									_this.triggerError(r.message);
+								}
+							},
+							error : function(XHR, textStatus, errorThrown) {
+								_this.triggerError('An application error occurred.  Please try again.');
 							}
-						},
-						error : function(XHR, textStatus, errorThrown) {
-							_this.triggerError('An application error occurred.  Please try again.');
-						}
-					});
-					
-					_this.Steps.setButtonLoading('submit', false);
-					return _success;
-				}
-			},
-			stepLoadCallback : function(stepId, step) { return true; }
-		});
-		
-		if(deps.$('.error').text() != '') {
-			deps.setTimeout(function() {
-					deps.$('#upgrade-steps').Steps.toggleError(true)
-				}, 1000);
+						});
+
+						_this.Steps.setButtonLoading('submit', false);
+						return _success;
+					}
+				},
+				stepLoadCallback : function(stepId, step) { return true; }
+			});
+
+			if(deps.$('.error').text() != '') {
+				deps.setTimeout(function() {
+						deps.$('#upgrade-steps').Steps.toggleError(true)
+					}, 1000);
+			}
 		}
+	});
+
+	if (typeof(document) != "undefined")
+		$(document).ready(uh({
+			'$' : $,
+			'setTimeout' : setTimeout,
+			'OpenVBX' : OpenVBX
+		}));
+	else {
+		upgrade_handler = uh;
 	}
-});
-if (typeof(document) != "undefined")
-	$(document).ready(upgrade_handler({
-		'$' : $,
-		'setTimeout' : setTimeout,
-		'OpenVBX' : OpenVBX
-	}));
+})();
