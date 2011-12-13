@@ -67,13 +67,16 @@ class VBX_Incoming_numbers extends Model
 	{		
 		$ci =& get_instance();
 		$enabled_sandbox_number = $ci->settings->get('enable_sandbox_number', $ci->tenant->id);
-
 		$cache_key = 'incoming-numbers';
 		if ($cache = $ci->api_cache->get($cache_key, __CLASS__, $ci->tenant->id))
 		{
-			if (!$retrieve_sandbox && $enabled_sandbox_number)
+			if (!$retrieve_sandbox || !$enabled_sandbox_number)
 			{
-				array_pop($cache);
+				foreach ($cache as $key => $item) {
+					if ($item->id == 'Sandbox') {
+						unset($cache[$key]);
+					}
+				}
 			}
 			return $cache;
 		}
@@ -101,17 +104,20 @@ class VBX_Incoming_numbers extends Model
 		}
 		
 		$ci = &get_instance();
-		$enabled_sandbox_number = $ci->settings->get('enable_sandbox_number', $ci->tenant->id);
-		if ($enabled_sandbox_number && $retrieve_sandbox && $sandbox_number = $this->get_sandbox())
+		if ($enabled_sandbox_number && $sandbox_number = $this->get_sandbox())
 		{
 			$numbers[] = $sandbox_number;
 		}
 
 		$ci->api_cache->set('incoming-numbers', $numbers, __CLASS__, $ci->tenant->id);
 
-		if (!$retrieve_sandbox && $enabled_sandbox_number)
+		if (!$retrieve_sandbox || !$enabled_sandbox_number)
 		{
-			array_pop($numbers);
+			foreach ($cache as $key => $item) {
+				if ($item->id == 'Sandbox') {
+					unset($cache[$key]);
+				}
+			}
 		}
 		
 		return $numbers;
