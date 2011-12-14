@@ -18,7 +18,7 @@
  * Contributor(s):
  **/
 
-require('../../assets/j/upgrade.js');
+require('../../../assets/j/upgrade.js');
 
 describe("upgrade page", function() {
 	var jQuery_mock;
